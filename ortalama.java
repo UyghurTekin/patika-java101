@@ -30,9 +30,9 @@ public class ortalama {
         ortalama = toplam/5;
 
          if(ortalama >= 60){
-             System.out.print("Tebrikler, Başariyle Sinif Geçtiniz !");
+             System.out.print("Tebrikler, Başariyle Sinif Geçtiniz ! Not Ortalamaniz: " + ortalama);
         }else{
-             System.out.print("Üzgünüz, Sinifta Kaldiniz !");
+             System.out.print("Üzgünüz, Sinifta Kaldiniz !Not Ortalamaniz: " + ortalama);
         }
 
     }
