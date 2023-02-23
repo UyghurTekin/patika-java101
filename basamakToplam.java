@@ -10,9 +10,7 @@ public class basamakToplam {
 
         while (sayi != 0){
             toplam += (sayi % 10) ;
-            System.out.println("Toplamm: " + toplam);
             sayi /= 10 ;
-            System.out.println("sayi: " + sayi);
         }
 
         System.out.println("Toplam: " + toplam);
