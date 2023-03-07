@@ -1,7 +1,7 @@
 public class Employee {
     String name;
     int salary, workHours, hireYear, workingYear =0;
-    double tax = 0 , bonus = 0, raiseSalary;
+    double tax = 0 , bonus = 0, raiseSalary = 0;
 
     public Employee(String name, int salary, int workHours, int hireYear){
         this.name = name;
