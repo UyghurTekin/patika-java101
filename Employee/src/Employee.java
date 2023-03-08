@@ -1,7 +1,7 @@
 public class Employee {
     String name;
     int salary, workHours, hireYear, workingYear =0;
-    double tax = 0 , bonus = 0, raiseSalary;
+    double tax = 0 , bonus = 0, raiseSalary = 0;
 
     public Employee(String name, int salary, int workHours, int hireYear){
         this.name = name;
@@ -28,7 +28,7 @@ public class Employee {
 
        this.workingYear = 2021 - this.salary;
 
-        if (this.workingYear < 10) {
+        if (this.workingYear > 0 && this.workingYear < 10) {
             this.raiseSalary = this.salary * 0.05;
         } else if (this.workingYear > 9 && this.workingYear < 20) {
             this.raiseSalary = this.salary * 0.1;
