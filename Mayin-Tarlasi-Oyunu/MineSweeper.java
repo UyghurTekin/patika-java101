@@ -2,213 +2,193 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class MineSweeper {
-    int row, col,count;
-    String[][] tarla;
-    int[][] userField;
+    private final int row, col, mine = -1, empty = -2, mineRate = 25;
+    private int count = 0; // Boş konum Sayısı .
+    private int[][] mineSweeper;
     Scanner inp = new Scanner(System.in);
     Random rnd = new Random();
 
-    MineSweeper(int row , int col){
+    MineSweeper(int row, int col) {
         this.row = row;
         this.col = col;
-        this.count = 0;
-        this.tarla = new String[row][col];
-        this.userField = new int[row][col];
-
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < col; j++) {
-                if (rnd.nextInt(100) < 25) { // mayin kapsama olasiliği .
-                    this.tarla[i][j] = "*";
-                }else {
-                    this.tarla[i][j] = "-";
-                    this.count++;
-                }
-
-            }
-        }
-
-        //System.out.println("mayin sayi:" + (row * col - this.count));
-
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < col; j++) {
-                    this.userField[i][j] = -1;
-            }
-        }
-
+        this.mineSweeper = new int[row][col];
     }
 
-    void oyun(){
-        System.out.println("Mayın Tarlası Oyununa Hoşgeldiniz !");
-        int satir,sutun,open; // Açilmiş konumlar.
+    public void run() {
+        welcome();
+        game();
+    }
+
+    private void game() {
+        creatMap(this.row, this.col);
+
+        int satir, sutun, open; // open = Açilmiş konum Sayısı.
+
+         //gameMap(); // Oyunu ön izleme amaçlidir !
 
         do {
             open = 0;
-            for (int[] row : userField ) {
-                for (int col: row ) {
-                    if (col == -1) {
-                        System.out.print(" -");
-                    }else{
-                        System.out.print(" " + col);
+            for (int[] row : mineSweeper) {
+                for (int col : row) {
+                    if (col == mine || col == empty) {
+                        System.out.print("- ");
+                    } else {
+                        System.out.print(col + " "); // kordinat yazdirilir .
                         open++;
                     }
                 }
-                System.out.println(" ");
+                System.out.println();
+
             }
 
-            if (this.count == open) {
+            if (this.count == open) { // mayın olmayan konumlarin bitip bitmediğinin kontrolünü sağlar .
                 kazandin();
                 break;
             }
 
+
             System.out.print("Satir girin:");
-            satir = inp.nextInt();
+            satir = inp.nextInt(); // 6
             System.out.print("Sutun girin:");
             sutun = inp.nextInt();
 
-            satir--; sutun--;
 
-            if (satir < this.row && sutun < this.col && satir >= 0 && sutun >= 0) {
+            satir--; // 5 .
+            sutun--; // 'Array.Langht' ile 'index' numrasi uyuşturma amaçlidir !
 
-                if (this.tarla[satir][sutun].equals("-")) {
+            if (satir < mineSweeper.length && sutun < mineSweeper[0].length && satir >= 0 && sutun >= 0) {
 
-                    tespit(satir,sutun);
+                if (this.mineSweeper[satir][sutun] == empty) {
 
-                } else if (this.tarla[satir][sutun].equals("*")) {
+                    tespit(satir, sutun);
+
+                } else if (this.mineSweeper[satir][sutun] == mine) {
                     gameOver();
-                    break;
+                    break; // do while
+                } else {
+                    System.out.println("Açilmiş Kordinat !");
                 }
 
-            }else {
-                System.out.println("Geçersiz Koordinat !");
+            } else {
+                System.out.println("Geçersiz Kordinat !");
                 System.out.println("Satir Sayisi: " + this.row);
                 System.out.println("Sutun Sayisi: " + this.col);
 
             }
 
-            System.out.println("===========================");
-        }while (true);
+            System.out.println("==============================");
+
+        } while (true);
 
     }
 
-    public void run() {
-        oyun();
+    private void creatMap(int row, int col) {
+        // tarlaya mayın yerleştiriliyor...
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                if (rnd.nextInt(100) < mineRate) { // mayin kapsama olasiliği .
+                    this.mineSweeper[i][j] = mine; // -1
+                } else {
+                    this.mineSweeper[i][j] = empty;
+                    this.count++;
+                }
+            }
+        }
     }
 
-    void kazandin(){
-        System.out.println("\n==========================\n=== TEBRIKLER KAZANDIN ===\n==========================\n");
-        gameMap();
-    }
-    void gameOver(){
-        System.out.println("\n========================\n======  Game Over  =====\n========================\n");
-        gameMap();
+    private void countMine(int i, int j, int row, int col) {
+        if (this.mineSweeper[i][j] == mine) {
+            this.mineSweeper[row][col] += 1;
+        }
     }
 
-    void tespit(int satir, int sutun){
+    private void tespit(int satir, int sutun) {
 
-        this.userField[satir][sutun] = 0 ;
+        this.mineSweeper[satir][sutun] = 0;
 
         if (satir == 0) {
             if (sutun == 0) {
                 //System.out.println("1.satir , 1.sutun"); // sol ust
 
-                for (int i = satir ; i < 2; i++) {
+                for (int i = satir; i < 2; i++) {
                     for (int j = sutun; j < 2; j++) {
-                        if (this.tarla[i][j].equals("*")) {
-                            this.userField[satir][sutun] += 1;
-                        }
+                        countMine(i, j, satir, sutun);
                     }
                 }
 
-            } else if (sutun < (this.tarla[sutun].length - 1)) {
+            } else if (sutun < (this.mineSweeper[satir].length - 1)) {
                 //System.out.println("1.satir , orta sutun"); // ust
 
-                for (int i = satir; i <= (satir + 1) ; i++) {
-                    for (int j = (sutun - 1); j <= (sutun + 1) ; j++) {
-                        if (this.tarla[i][j].equals("*")) {
-                            this.userField[satir][sutun] += 1;
-                        }
+                for (int i = satir; i <= (satir + 1); i++) {
+                    for (int j = (sutun - 1); j <= (sutun + 1); j++) {
+                        countMine(i, j, satir, sutun);
                     }
                 }
 
 
-            } else if (sutun == (this.tarla[sutun].length - 1)) {
+            } else if (sutun == (this.mineSweeper[satir].length - 1)) {
                 //System.out.println("1.satir , son sutun"); // sag ust
 
                 for (int i = satir; i < 2; i++) {
-                    for (int j = (sutun - 1); j < this.tarla[satir].length; j++) {
-                        if (this.tarla[i][j].equals("*")) {
-                            this.userField[satir][sutun] += 1;
-                        }
+                    for (int j = (sutun - 1); j < this.mineSweeper[satir].length; j++) {
+                        countMine(i, j, satir, sutun);
                     }
                 }
 
             }
-        } else if (satir < (this.tarla.length - 1)) {
+        } else if (satir < (this.mineSweeper.length - 1)) {
             if (sutun == 0) {
                 //System.out.println("orta.satir , 1.sutun"); // sol
 
-                for (int i = (satir - 1); i <= (satir + 1) ; i++) {
-                    for (int j = sutun; j <= (sutun + 1) ; j++) {
-                        if (this.tarla[i][j].equals("*")) {
-                            this.userField[satir][sutun] += 1;
-                        }
+                for (int i = (satir - 1); i <= (satir + 1); i++) {
+                    for (int j = sutun; j <= (sutun + 1); j++) {
+                        countMine(i, j, satir, sutun);
                     }
                 }
 
-            } else if (sutun < this.tarla[sutun].length - 1) {
+            } else if (sutun < this.mineSweeper[satir].length - 1) {
                 //System.out.println("orta.satir , orta sutun");
 
-                for (int i = (satir - 1); i <= (satir+ 1) ; i++) {
-                    for (int j = (sutun - 1) ; j <= (sutun + 1); j++) {
-                        if (this.tarla[i][j].equals("*")) {
-                            this.userField[satir][sutun] += 1;
-                        }
+                for (int i = (satir - 1); i <= (satir + 1); i++) {
+                    for (int j = (sutun - 1); j <= (sutun + 1); j++) {
+                        countMine(i, j, satir, sutun);
                     }
                 }
 
-            } else if (sutun == (this.tarla[sutun].length - 1)) {
+            } else if (sutun == (this.mineSweeper[satir].length - 1)) {
                 //System.out.println("orta.satir , son sutun"); // sag
 
-                for (int i = (satir  - 1); i <= (satir + 1) ; i++) {
+                for (int i = (satir - 1); i <= (satir + 1); i++) {
                     for (int j = (sutun - 1); j <= sutun; j++) {
-                        if (this.tarla[i][j].equals("*")) {
-                            this.userField[satir][sutun] += 1;
-                        }
+                        countMine(i, j, satir, sutun);
                     }
                 }
 
             }
-        } else if (satir == (this.tarla.length - 1)) {
+        } else if (satir == (this.mineSweeper.length - 1)) {
             if (sutun == 0) {
                 //System.out.println("son.satir , 1.sutun"); // sol alt
 
-                for (int i = (satir - 1 ) ; i < this.tarla.length; i++) {
+                for (int i = (satir - 1); i < mineSweeper.length; i++) {
                     for (int j = sutun; j < 2; j++) {
-                        if (this.tarla[i][j].equals("*")) {
-                            this.userField[satir][sutun] += 1;
-                        }
+                        countMine(i, j, satir, sutun);
                     }
                 }
 
-            } else if (sutun < (this.tarla[sutun].length - 1)) {
+            } else if (sutun < (this.mineSweeper[satir].length - 1)) {
                 //System.out.println("son.satir , orta sutun"); // alt
-
-                for (int i = (satir  - 1); i <= satir ; i++) {
+                for (int i = (satir - 1); i <= satir; i++) {
                     for (int j = (sutun - 1); j <= (sutun + 1); j++) {
-                        if (this.tarla[i][j].equals("*")) {
-                            this.userField[satir][sutun] += 1;
-                        }
+                        countMine(i, j, satir, sutun);
                     }
                 }
 
-            } else if (sutun == (this.tarla[sutun].length - 1)) {
+            } else if (sutun == (this.mineSweeper[satir].length - 1)) {
                 //System.out.println("son.satir , son.sutun"); // sag alt
 
-                for (int i = (satir - 1); i < this.tarla.length; i++) {
-                    for (int j = (sutun - 1); j < this.tarla[0].length; j++) {
-                        if (this.tarla[i][j].equals("*")) {
-                            this.userField[satir][sutun] += 1;
-                        }
+                for (int i = (satir - 1); i < this.mineSweeper.length; i++) {
+                    for (int j = (sutun - 1); j < this.mineSweeper[0].length; j++) {
+                        countMine(i, j, satir, sutun);
                     }
                 }
 
@@ -217,26 +197,43 @@ public class MineSweeper {
 
     }
 
-    void gameMap(){
-        System.out.println("=====Mayin Haritasi=====");
+    private void gameMap() {
+        System.out.println("========Mayin Haritasi========");
 
-        for (int i = 0; i < this.userField.length ; i++) {
-            for (int j = 0; j < this.userField[i].length  ; j++) {
-                if (this.tarla[i][j].equals("*")) {
-                    System.out.print(" *");
-                }else{
-                    if (this.userField[i][j] != -1) {
-                        System.out.print(" " + this.userField[i][j]);
-                    }else {
-                        System.out.print(" " + this.tarla[i][j]);
+        for (int[] row : mineSweeper) {
+            for (int col : row) {
+                if (col == mine) {
+                    System.out.print("* ");
+                } else {
+                    if (col == empty) {
+                        System.out.print("- ");
+                    } else {
+                        System.out.print(col + " ");
                     }
-
                 }
             }
             System.out.println(" ");
         }
 
-        System.out.println("========================");
+        System.out.println("==============================");
+    }
+
+    private void welcome() {
+        System.out.println("==============================");// 30
+        System.out.println("     ====================");// 20
+        System.out.println("    Welcome to MineSweeper");
+        System.out.println("     ====================");
+        System.out.println("==============================");
+    }
+
+    private void kazandin() {
+        System.out.println("\n==============================\n===== TEBRIKLER KAZANDIN =====\n==============================\n");
+        gameMap();
+    }
+
+    private void gameOver() {
+        System.out.println("\n==============================\n======  Game Over  =====\n==============================\n");
+        gameMap();
     }
 
 }
